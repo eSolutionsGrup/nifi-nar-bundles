@@ -72,12 +72,11 @@ public class RedisHSetProcessor extends AbstractRedisHashesProcessor {
             return;
         }
 
-
         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         session.exportTo(flowFile, byteStream);
         byte[] cacheValue = byteStream.toByteArray();
-        String hashKey = context.getProperty(HASH_PROPERTY).getValue();
-        String field = context.getProperty(FIELD_PROPERTY).getValue();
+        String hashKey = context.getProperty(HASH_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
+        String field = context.getProperty(FIELD_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
 
         try {
             withConnection(redisConnection -> redisConnection.hSet(hashKey.getBytes(), field.getBytes(), cacheValue));

@@ -16,6 +16,7 @@
  */
 package ro.esolutions.nifi.processors.redishash;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.nifi.annotation.behavior.EventDriven;
 import org.apache.nifi.annotation.behavior.SupportsBatching;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
@@ -77,8 +78,8 @@ public class RedisHGetProcessor extends AbstractRedisHashesProcessor {
             return;
         }
 
-        String hashKey = context.getProperty(HASH_PROPERTY).getValue();
-        String field = context.getProperty(FIELD_PROPERTY).getValue();
+        String hashKey = context.getProperty(HASH_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
+        String field = context.getProperty(FIELD_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
 
         try {
             Map<String, byte[]> cacheValues = withConnection(actionHGet(hashKey, field));
@@ -102,7 +103,7 @@ public class RedisHGetProcessor extends AbstractRedisHashesProcessor {
         return redisConnection -> {
             Map<String, byte[]> response = new HashMap<>();
 
-            if (field.isEmpty()) {
+            if (StringUtils.isBlank(field)) {
                 Objects.requireNonNull(redisConnection.hGetAll(hashKey.getBytes()))
                         .forEach((key, value) -> {
                             if (null != value) {

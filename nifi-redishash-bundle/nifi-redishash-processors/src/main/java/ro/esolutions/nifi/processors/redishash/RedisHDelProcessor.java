@@ -80,8 +80,8 @@ public class RedisHDelProcessor extends AbstractRedisHashesProcessor {
             return;
         }
 
-        String hashKey = context.getProperty(HASH_PROPERTY).getValue();
-        String field = context.getProperty(FIELD_PROPERTY).getValue();
+        String hashKey = context.getProperty(HASH_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
+        String field = context.getProperty(FIELD_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
 
         try {
             Long result = withConnection(redisConnection -> redisConnection.hDel(hashKey.getBytes(), field.getBytes()));
