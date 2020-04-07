@@ -16,6 +16,8 @@ import java.util.*;
 
 public abstract class AbstractRedisHashesProcessor extends AbstractSessionFactoryProcessor {
 
+    static final String HASH_KEY_ATTR = "hash.key";
+
     public static final PropertyDescriptor REDIS_CONNECTION_SERVICE = new PropertyDescriptor.Builder()
             .name("Redis Connection Pool")
             .description("The Controller Service that is used to get the cached values.")

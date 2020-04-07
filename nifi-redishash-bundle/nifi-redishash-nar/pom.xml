@@ -19,7 +19,7 @@
     <parent>
         <groupId>ro.esolutions.nifi</groupId>
         <artifactId>nifi-redishash-bundle</artifactId>
-        <version>1.7.0.1.0</version>
+        <version>1.8.0.1.0</version>
     </parent>
 
     <artifactId>nifi-redishash-nar</artifactId>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>ro.esolutions.nifi</groupId>
             <artifactId>nifi-redishash-processors</artifactId>
-            <version>1.7.0.1.0</version>
+            <version>1.8.0.1.0</version>
         </dependency>
     </dependencies>
 

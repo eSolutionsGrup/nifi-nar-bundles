@@ -32,6 +32,7 @@ import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -83,8 +84,13 @@ public class RedisHDelProcessor extends AbstractRedisHashesProcessor {
         String hashKey = context.getProperty(HASH_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
         String field = context.getProperty(FIELD_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
 
+        flowFile = session.putAttribute(flowFile, HASH_KEY_ATTR, hashKey);
+
         try {
-            Long result = withConnection(redisConnection -> redisConnection.hDel(hashKey.getBytes(), field.getBytes()));
+            Long result = withConnection(redisConnection ->
+                    redisConnection.hDel(
+                            hashKey.getBytes(StandardCharsets.UTF_8),
+                            field.getBytes(StandardCharsets.UTF_8)));
 
             if(result > 0L) {
                 session.transfer(flowFile, REL_SUCCESS);

@@ -10,7 +10,7 @@
         
     <artifactId>nifi-nar-bundles</artifactId>
         
-    <version>1.7.0</version>
+    <version>1.8.0</version>
       
   </parent>
     
@@ -18,7 +18,7 @@
     
   <artifactId>nifi-nar-bundles</artifactId>
     
-  <version>1.7.0.1.0</version>
+  <version>1.8.0.1.0</version>
     
   <modules>
         

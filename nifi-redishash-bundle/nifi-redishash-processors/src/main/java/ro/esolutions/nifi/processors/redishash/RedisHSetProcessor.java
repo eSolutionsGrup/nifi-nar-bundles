@@ -33,6 +33,7 @@ import org.apache.nifi.processor.util.StandardValidators;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,7 @@ import java.util.Set;
 @EventDriven
 @SupportsBatching
 @Tags({"redis", "hash", "set", "distributed"})
-@CapabilityDescription("Get the content of a FlowFile and put it to redis, using a hash key and field computed from FlowFile attributes")
+@CapabilityDescription("Set the content of a FlowFile and put it to redis, using a hash key and field computed from FlowFile attributes")
 @SeeAlso(classNames = {"org.apache.nifi.redis.service.RedisConnectionPool"})
 public class RedisHSetProcessor extends AbstractRedisHashesProcessor {
 
@@ -68,22 +69,30 @@ public class RedisHSetProcessor extends AbstractRedisHashesProcessor {
     @Override
     public void onTrigger(final ProcessContext context, final ProcessSession session) throws ProcessException {
         FlowFile flowFile = session.get();
-        if ( flowFile == null ) {
+        if (flowFile == null) {
             return;
         }
 
         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         session.exportTo(flowFile, byteStream);
         byte[] cacheValue = byteStream.toByteArray();
+
         String hashKey = context.getProperty(HASH_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
         String field = context.getProperty(FIELD_PROPERTY).evaluateAttributeExpressions(flowFile).getValue();
 
+        flowFile = session.putAttribute(flowFile, HASH_KEY_ATTR, hashKey);
+
         try {
-            withConnection(redisConnection -> redisConnection.hSet(hashKey.getBytes(), field.getBytes(), cacheValue));
+            withConnection(redisConnection ->
+                    redisConnection.hSet(
+                            hashKey.getBytes(StandardCharsets.UTF_8),
+                            field.getBytes(StandardCharsets.UTF_8),
+                            cacheValue));
+
         } catch (IOException e) {
             flowFile = session.penalize(flowFile);
             session.transfer(flowFile, REL_FAILURE);
-            logger.error("Unable to communicate with redis when processing {} due to {}", new Object[] {flowFile, e});
+            logger.error("Unable to communicate with redis when processing {} due to {}", new Object[]{flowFile, e});
         }
 
         session.transfer(flowFile, REL_SUCCESS);
