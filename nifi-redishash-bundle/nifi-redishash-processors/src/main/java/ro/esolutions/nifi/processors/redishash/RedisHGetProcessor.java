@@ -114,20 +114,20 @@ public class RedisHGetProcessor extends AbstractRedisHashesProcessor {
                         .map(r ->
                             r.entrySet().stream()
                             .filter(e -> e.getValue() != null)
-                            .map(entry -> toRedisResponse(new String(entry.getKey()), entry.getValue()))
+                            .map(entry -> toHashesResponse(new String(entry.getKey()), entry.getValue()))
                             .collect(Collectors.toList())
                         ).orElseGet(ArrayList::new);
             } else {
                 byte[] fieldByte = field.getBytes(StandardCharsets.UTF_8);
 
                 return Optional.ofNullable(redisConnection.hGet(hashByte, fieldByte))
-                    .map(value -> Collections.singletonList(toRedisResponse(field, value)))
+                    .map(value -> Collections.singletonList(toHashesResponse(field, value)))
                     .orElseGet(ArrayList::new);
             }
         };
     }
 
-    private HashesResponse toRedisResponse(String field, byte[] value) {
+    private HashesResponse toHashesResponse(String field, byte[] value) {
         try {
             return new HashesResponse(field, objectMapper.readTree(value));
         } catch (IOException e) {
