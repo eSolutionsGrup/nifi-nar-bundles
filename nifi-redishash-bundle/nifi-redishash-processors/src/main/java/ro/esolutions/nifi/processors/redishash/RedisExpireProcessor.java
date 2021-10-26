@@ -87,6 +87,16 @@ public class RedisExpireProcessor extends AbstractProcessor {
     }
 
     @Override
+    public Set<Relationship> getRelationships() {
+        return this.relationships;
+    }
+
+    @Override
+    protected List<PropertyDescriptor> getSupportedPropertyDescriptors() {
+        return this.descriptors;
+    }
+
+    @Override
     public void onTrigger(ProcessContext context, ProcessSession session) throws ProcessException {
         connectionPool = context.getProperty(REDIS_CONNECTION_SERVICE).asControllerService(RedisConnectionPool.class);
 

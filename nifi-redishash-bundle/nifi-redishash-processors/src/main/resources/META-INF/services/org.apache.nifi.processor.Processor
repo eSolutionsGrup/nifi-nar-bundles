@@ -15,3 +15,4 @@
 ro.esolutions.nifi.processors.redishash.RedisHSetProcessor
 ro.esolutions.nifi.processors.redishash.RedisHGetProcessor
 ro.esolutions.nifi.processors.redishash.RedisHDelProcessor
+ro.esolutions.nifi.processors.redishash.RedisExpireProcessor
