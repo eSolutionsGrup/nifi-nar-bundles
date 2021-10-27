@@ -63,6 +63,11 @@ public class RedisExpireProcessor extends AbstractProcessor {
             .description("FlowFiles that failed to send to the destination are sent out this relationship.")
             .build();
 
+    public static final Relationship REL_NOT_FOUND = new Relationship.Builder()
+            .name("not.found")
+            .description("FlowFile that fail because the hash or field do not exist will be routed to this relationship.")
+            .build();
+
     protected volatile ComponentLog logger;
     private volatile RedisConnectionPool connectionPool;
 
@@ -83,6 +88,7 @@ public class RedisExpireProcessor extends AbstractProcessor {
         final Set<Relationship> relationships = new HashSet();
         relationships.add(REL_SUCCESS);
         relationships.add(REL_FAILURE);
+        relationships.add(REL_NOT_FOUND);
         this.relationships = Collections.unmodifiableSet(relationships);
     }
 
@@ -112,10 +118,16 @@ public class RedisExpireProcessor extends AbstractProcessor {
         connectionPool = context.getProperty(REDIS_CONNECTION_SERVICE).asControllerService(RedisConnectionPool.class);
 
         try {
-            withConnection(redisConnection ->
+            Boolean success = withConnection(redisConnection ->
                     redisConnection.expire(
                             hashKey.getBytes(StandardCharsets.UTF_8),
                             ttl));
+
+            if(success) {
+                session.transfer(flowFile, REL_SUCCESS);
+            } else {
+                session.transfer(flowFile, REL_NOT_FOUND);
+            }
 
         } catch (IOException e) {
             flowFile = session.penalize(flowFile);
